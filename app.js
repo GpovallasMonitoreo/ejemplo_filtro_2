@@ -22,13 +22,13 @@ const fragmentShader = `
   void main() {
     vec4 originalColor = texture2D(tDiffuse, vUv);
     
-    // Línea divisoria central
-    if (abs(vUv.x - 0.5) < (2.0 / resolution.x)) {
+    // 1. LÍNEA DIVISORIA
+    if (abs(vUv.x - 0.5) < (1.5 / resolution.x)) {
         gl_FragColor = vec4(1.0, 1.0, 1.0, 0.8); 
         return;
     }
 
-    // Mitad Izquierda (Piel Actual)
+    // 2. MITAD IZQUIERDA: PIEL ACTUAL
     if (vUv.x > 0.5) { 
         vec3 oldColor = originalColor.rgb;
         float luminance = dot(oldColor, vec3(0.299, 0.587, 0.114));
@@ -38,7 +38,7 @@ const fragmentShader = `
         return;
     }
 
-    // Mitad Derecha (Filtro Eucerin)
+    // 3. MITAD DERECHA: FILTRO EUCERIN
     if (faceCenter.x < 0.0) {
         gl_FragColor = originalColor;
         return;
@@ -89,8 +89,8 @@ const fragmentShader = `
 document.addEventListener('DOMContentLoaded', async () => {
     const video = document.getElementById('video_feed');
     const canvas = document.getElementById('output_canvas');
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, preserveDrawingBuffer: true });
     
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, preserveDrawingBuffer: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
     const scene = new THREE.Scene();
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const uniforms = {
         tDiffuse: { value: videoTexture },
-        resolution: { value: new THREE.Vector2(1280, 720) },
+        resolution: { value: new THREE.Vector2(1080, 1920) }, // Default móvil
         faceCenter: { value: new THREE.Vector2(-1.0, -1.0) },
         faceRadius: { value: 0.3 }
     };
@@ -112,27 +112,53 @@ document.addEventListener('DOMContentLoaded', async () => {
     const planeMesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), shaderMaterial);
     scene.add(planeMesh);
 
-    // --- LA SOLUCIÓN DEL TAMAÑO ---
-    video.addEventListener('loadedmetadata', () => {
+    let videoIsReady = false;
+
+    // --- 1. CONEXIÓN DIRECTA A LA CÁMARA (Sin intermediarios) ---
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: 'user',
+                width: { ideal: 1920 }, // Pide máxima calidad
+                height: { ideal: 1920 } // El celular decidirá su mejor proporción nativa
+            },
+            audio: false
+        });
+        video.srcObject = stream;
+        video.play();
+    } catch (err) {
+        console.error("Error de cámara:", err);
+        alert("Por favor permite el acceso a la cámara para ver la experiencia.");
+    }
+
+    // --- 2. EL AJUSTE PERFECTO ---
+    video.addEventListener('loadeddata', () => {
         const vw = video.videoWidth;
         const vh = video.videoHeight;
         
-        // El 'false' al final evita que Three.js le inyecte estilos CSS al canvas que deforman la página
-        renderer.setSize(vw, vh, false);
+        // Seteamos la resolución exacta del hardware de la cámara
+        renderer.setSize(vw, vh, false); 
         shaderMaterial.uniforms.resolution.value.set(vw, vh);
+        videoIsReady = true;
+        
+        // Encendemos la Inteligencia Artificial
+        processAI();
     });
 
-    function animate() {
-        requestAnimationFrame(animate);
-        if (video.readyState >= video.HAVE_CURRENT_DATA) videoTexture.needsUpdate = true;
-        renderer.render(scene, camera);
+    // --- 3. BUCLE DE RENDERIZADO VISUAL (Corre a 60FPS) ---
+    function renderLoop() {
+        requestAnimationFrame(renderLoop);
+        if (videoIsReady && video.readyState >= 2) {
+            videoTexture.needsUpdate = true;
+            renderer.render(scene, camera);
+        }
     }
-    animate();
+    renderLoop();
 
+    // --- 4. CONFIGURACIÓN DE IA MEDIAPIPE ---
     const faceMesh = new FaceMesh({
         locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
     });
-    
     faceMesh.setOptions({ maxNumFaces: 1, refineLandmarks: false });
 
     faceMesh.onResults((results) => {
@@ -141,6 +167,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const nose = landmarks[4];
             const leftCheek = landmarks[234];
             const rightCheek = landmarks[454];
+            
+            // Distancia absoluta para el radio
             const faceWidth = Math.abs(rightCheek.x - leftCheek.x);
             
             shaderMaterial.uniforms.faceCenter.value.set(1.0 - nose.x, 1.0 - nose.y);
@@ -150,16 +178,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    const cameraUtils = new Camera(video, {
-        onFrame: async () => { await faceMesh.send({ image: video }); },
-        // En lugar de forzar una resolución exacta, pedimos lo estándar y dejamos que el celular asigne su mejor cámara frontal nativa
-        width: 1280, 
-        height: 720, 
-        facingMode: 'user'
-    });
-    
-    await cameraUtils.start();
+    // --- 5. BUCLE DE INTELIGENCIA ARTIFICIAL (Independiente) ---
+    async function processAI() {
+        if (videoIsReady && video.readyState >= 2) {
+            await faceMesh.send({ image: video });
+        }
+        // Se llama a sí mismo en el siguiente frame sin trabar el render
+        requestAnimationFrame(processAI); 
+    }
 
+    // Evento Landing Page
     document.getElementById('buy_btn').addEventListener('click', () => {
         window.location.href = "https://eucerin.com.mx/productos/hyaluron-filler";
     });
