@@ -2,7 +2,9 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- ESTA LÍNEA ES LA CLAVE PARA EL MÓVIL: Evita que la pantalla se haga pequeña -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
     <title>Eucerin - Hyaluron-Filler</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
@@ -12,21 +14,16 @@
     <video id="video_feed" autoplay playsinline muted></video>
     <canvas id="output_canvas"></canvas>
 
-    <!-- UI Minimalista -->
     <div class="ui-layer">
-        
-        <!-- Header Limpio -->
         <header class="top-nav">
             <h1 class="brand-text">EUCERIN</h1>
         </header>
 
-        <!-- Etiquetas de Split Screen (Flotantes y sutiles) -->
         <div class="split-indicators">
             <span class="tag">TU PIEL ACTUAL</span>
             <span class="tag tag-active">CON HYALURON-FILLER</span>
         </div>
 
-        <!-- Tarjeta de Producto (Orientada a la Venta) -->
         <div class="product-card">
             <div class="product-details">
                 <span class="category">SÉRUM ANTI-EDAD</span>
@@ -35,7 +32,6 @@
             </div>
             <button id="buy_btn" class="cta-button">Comprar Ahora</button>
         </div>
-
     </div>
 
     <script type="module" src="app.js"></script>
