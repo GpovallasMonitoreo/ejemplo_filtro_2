@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eucerin - Hyaluron-Filler</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <video id="video_feed" autoplay playsinline muted></video>
+    <canvas id="output_canvas"></canvas>
+
+    <!-- UI Minimalista -->
+    <div class="ui-layer">
+        
+        <!-- Header Limpio -->
+        <header class="top-nav">
+            <h1 class="brand-text">EUCERIN</h1>
+        </header>
+
+        <!-- Etiquetas de Split Screen (Flotantes y sutiles) -->
+        <div class="split-indicators">
+            <span class="tag">TU PIEL ACTUAL</span>
+            <span class="tag tag-active">CON HYALURON-FILLER</span>
+        </div>
+
+        <!-- Tarjeta de Producto (Orientada a la Venta) -->
+        <div class="product-card">
+            <div class="product-details">
+                <span class="category">SÉRUM ANTI-EDAD</span>
+                <h2>Hyaluron-Filler + 3x Effect</h2>
+                <p>Rellena, estimula y protege. Resultados al instante.</p>
+            </div>
+            <button id="buy_btn" class="cta-button">Comprar Ahora</button>
+        </div>
+
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
