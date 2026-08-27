@@ -2,18 +2,18 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <!-- ESTA LÍNEA ES LA CLAVE PARA EL MÓVIL: Evita que la pantalla se haga pequeña -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
     <title>Eucerin - Hyaluron-Filler</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    
+    <!-- SOLO dejamos FaceMesh, eliminamos la librería de cámara que causaba el zoom -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
 </head>
 <body>
     <video id="video_feed" autoplay playsinline muted></video>
     <canvas id="output_canvas"></canvas>
 
+    <!-- UI Minimalista -->
     <div class="ui-layer">
         <header class="top-nav">
             <h1 class="brand-text">EUCERIN</h1>
